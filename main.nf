@@ -3,7 +3,7 @@
 nextflow.enable.dsl=2
 
 params.reads = 'data/*_{1,2}.fq.gz'
-params.outDir = 'outputs/'
+params.outdir = 'outputs/'
 params.adapters = 'adapters.fa'
 log.info """
       LIST OF PARAMETERS
@@ -49,7 +49,7 @@ process trimmomatic {
     """
     trimmomatic PE -phred33 ${reads[0]} ${reads[1]} ${sample}_1.trimmed.fq.gz ${sample}_1.discarded.fq.gz ${sample}_2.trimmed.fq.gz ${sample}_2.discarded.fq.gz 
     ILLUMINACLIP:${adapters_file}:2:30:10
-    """
+.    """
 }
 
 // Run the workflow
