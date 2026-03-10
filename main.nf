@@ -49,14 +49,12 @@ process trimmomatic {
     """
     trimmomatic PE -phred33 ${reads[0]} ${reads[1]} ${sample}_1.trimmed.fq.gz ${sample}_1.discarded.fq.gz ${sample}_2.trimmed.fq.gz ${sample}_2.discarded.fq.gz 
     ILLUMINACLIP:${adapters_file}:2:30:10
-.    """
+    """
 }
 
 // Run the workflow
 workflow {
     read_pairs_ch.view()
     fastqc(read_pairs_ch)
-    trimmomatic(read_pairs_ch)
+    trimmomatic(read_pairs_ch, adapter_ch)
 }
-
-
