@@ -1,5 +1,5 @@
 #!/usr/bin/env nextflow
-
+# Nextflow
 nextflow.enable.dsl=2
 
 params.reads = 'data/*_{1,2}.fq.gz'
