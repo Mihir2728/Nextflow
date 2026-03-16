@@ -4,6 +4,7 @@ nextflow.enable.dsl=2
 params.reads = 'data/*_{1,2}.fq.gz'
 params.outdir = 'outputs/'
 params.adapters = 'adapters.fa'
+params.lg12 = 'LG12.fasta'
 log.info """
       LIST OF PARAMETERS
 ================================
@@ -15,6 +16,7 @@ Adapters         : ${params.adapters}
 // Create read channel
 read_pairs_ch = Channel.fromFilePairs(params.reads, checkIfExists: true).map { sample, reads -> tuple(sample, reads.collect { it.toAbsolutePath() }) }
 adapter_ch = Channel.fromPath(params.adapters)
+ref_genome_ch = Channel.fromPath(params.lg12)
 
 // Define fastqc process
 process fastqc {
@@ -41,8 +43,8 @@ process trimmomatic {
     path adapters_file
 
     output:
-    tuple val("${sample}"), path("${sample}*.trimmed.fq.gz")
-    tuple val("${sample}"), path("${sample}*.discarded.fq.gz")
+    tuple val("${sample}"), path("${sample}*.trimmed.fq.gz"), emit: trimmed_reads
+    tuple val("${sample}"), path("${sample}*.discarded.fq.gz"), emit: discarded_reads
 
     script:
     """
@@ -50,9 +52,27 @@ process trimmomatic {
     """
 }
 
+// Process alignment
+process bwa_mem2 {
+    publishDir "${params.outdir}/bwa_alignment/", mode: 'copy'
+    
+    input:
+    tuple val(sample), path(trimmed_reads)
+
+    output:
+    tuple val(sample), path("${sample}.bam")
+
+    script:
+    """
+    bwa-mem2 mem -t 4 $REF /Users/drmihirchachar/Downloads/Nextflow/practical/outputs/trimmed-reads-A_33_FDSW202661760-1r_HTNK5DSXY_L3_sub/A_33_FDSW202661760-1r_HTNK5DSXY_L3_sub_1.trimmed.fq.gz /Users/drmihirchachar/Downloads/Nextflow/practical/outputs/trimmed-reads-A_33_FDSW202661760-1r_HTNK5DSXY_L3_sub/A_33_FDSW202661760-1r_HTNK5DSXY_L3_sub_2.trimmed.fq.gz | samtools sort -@ 4 -o sample.sorted.bam
+    """
+}
+
+
 // Run the workflow
 workflow {
     read_pairs_ch.view()
     fastqc(read_pairs_ch)
     trimmomatic(read_pairs_ch, adapter_ch)
+    bwa_mem2(trimmomatic.out.trimmed_reads, ref_genome_ch)
 }
