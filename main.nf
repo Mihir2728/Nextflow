@@ -16,7 +16,7 @@ Adapters         : ${params.adapters}
 // Create read channel
 read_pairs_ch = Channel.fromFilePairs(params.reads, checkIfExists: true).map { sample, reads -> tuple(sample, reads.collect { it.toAbsolutePath() }) }
 adapter_ch = Channel.fromPath(params.adapters)
-ref_genome_ch = Channel.fromPath(params.lg12)
+ref_genome_ch = Channel.fromPath("LG12.fasta*").collect()
 
 // Define fastqc process
 process fastqc {
@@ -58,13 +58,14 @@ process bwa_mem2 {
     
     input:
     tuple val(sample), path(trimmed_reads)
+    path index_files
 
     output:
     tuple val(sample), path("${sample}.bam")
 
     script:
     """
-    bwa-mem2 mem -t 4 $REF /Users/drmihirchachar/Downloads/Nextflow/practical/outputs/trimmed-reads-A_33_FDSW202661760-1r_HTNK5DSXY_L3_sub/A_33_FDSW202661760-1r_HTNK5DSXY_L3_sub_1.trimmed.fq.gz /Users/drmihirchachar/Downloads/Nextflow/practical/outputs/trimmed-reads-A_33_FDSW202661760-1r_HTNK5DSXY_L3_sub/A_33_FDSW202661760-1r_HTNK5DSXY_L3_sub_2.trimmed.fq.gz | samtools sort -@ 4 -o sample.sorted.bam
+    bwa-mem2 mem -t 4 LG12.fasta ${trimmed_reads[0]} ${trimmed_reads[1]} | samtools sort -@ 4 -o ${sample}.bam
     """
 }
 
