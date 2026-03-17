@@ -52,7 +52,7 @@ process trimmomatic {
     """
 }
 
-// Process alignment
+// Process bwa_mem2
 process bwa_mem2 {
     publishDir "${params.outdir}/bwa_alignment/", mode: 'copy'
     
