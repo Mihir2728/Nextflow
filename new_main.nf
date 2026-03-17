@@ -8,8 +8,7 @@ params.adapters = 'adapters.fa'
 params.lg12 = 'LG12.fasta'
 
 // Create read channel
-read_pairs_ch = Channel.fromFilePairs(params.reads, checkIfExists: true).map { sample, reads -> tuple(sample, reads.collect { it.toAb
-solutePath() }) }
+read_pairs_ch = Channel.fromFilePairs(params.reads, checkIfExists: true).map { sample, reads -> tuple(sample, reads.collect { it.toAbsolutePath() }) }
 adapter_ch = Channel.fromPath(params.adapters)
 ref_genome_ch = Channel.fromPath("LG12.fasta*").collect()
 
