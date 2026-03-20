@@ -7,10 +7,10 @@ process bwa_mem2 {
     path index_files
 
     output:
-    tuple val(sample), path("${sample}.bam")
+    tuple val(sample), path("${sample}.sam")
 
     script:
     """
-    bwa-mem2 mem -t 4 LG12.fasta ${trimmed_reads[0]} ${trimmed_reads[1]} | samtools sort -@ 4 -o ${sample}.bam
+    bwa-mem2 mem -t 4 LG12.fasta ${trimmed_reads[0]} ${trimmed_reads[1]} | samtools sort -@ 4 -o ${sample}.sam
     """
 }
